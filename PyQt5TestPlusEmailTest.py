@@ -14,9 +14,9 @@ from email import encoders
 import smtplib
 #Email function
 def sendEmail():
-    #to/from var
+    #to/from vars
     fromaddr = "samuel.brand@ngsd.k12.wi.us"
-    toaddr = mytext
+    toaddr = toAddrInput
 
     msg = MIMEMultipart()
 
@@ -39,6 +39,9 @@ def sendEmail():
     #start smtp
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
+    #get password from environment variable
+    #set it on linux with: export INPLAINSITE="passwd"
+    #set it on windows with: SET INPLAINSITE=passwd
     passwd = os.environ['INPLAINSITE']
     server.login(fromaddr, passwd)
     text = msg.as_string()
@@ -47,34 +50,78 @@ def sendEmail():
     server.quit()
 
 #GUI Stuff
+from PyQt5.QtCore import *
+from PyQt5.QtGui import QFont
+#from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel
+#Countdown Stuff
+import time
 #Init PyQt5
 app = QApplication([])
-#Vars
-window = QWidget()
-window2 = QWidget()
-textBox = QLineEdit()
-button = QPushButton('Send')
-label = QLabel('Email To Send Picture:')
-#Layout
-layout = QVBoxLayout()
-layout.addWidget(label)
-layout.addWidget(textBox)
-layout.addWidget(button)
+#Startup Vars
+startupWindow = QWidget()
+startupLabel = QLabel('CS Club Photobooth!\n Press the button to get started!')
+startupButton = QPushButton('Simulate Physical Button')
 
-#Show
-window.setLayout(layout)
-window2.show()
-window.show()
-window2.close()
+#Startup Window Layout
+startupLayout = QVBoxLayout()
+startupLayout.addWidget(startupLabel)
+startupLayout.addWidget(startupButton)
+startupWindow.setLayout(startupLayout)
+startupLabel.setAlignment(Qt.AlignCenter)
+startupLabel.setFont(QFont('Arial', 40))
 
-#Logic
-mytext = ""
+#Show Startup Window
+startupWindow.show()
+
+#Startup Logic (somehow this works, I have no clue how but just go with it)
+def start_timer(slot, count=1, interval=1000):
+    counter = 11
+    def handler():
+        nonlocal counter
+        counter -= 1
+        slot(counter)
+        if counter <= 0:
+            timer.stop()
+            timer.deleteLater()
+    timer = QTimer()
+    timer.timeout.connect(handler)
+    timer.start(interval)
+
+def timer_func(count):
+    startupLabel.setText(str(count))
+    if count <= 0:
+        startupLabel.setText("Done!")
+        #TAKE PICTURE CODE HERE
+        startupWindow.close()
+        emailWindow.show()
+
+def startupFunction():
+    startupButton.setText('Clicked (Temp)')
+    start_timer(timer_func, 11)
+
+startupButton.clicked.connect(lambda: startupFunction())
+
+#Email Vars
+emailWindow = QWidget()
+emailTextBox = QLineEdit()
+emailButton = QPushButton('Send')
+emailLabel = QLabel('Email To Send Picture:')
+
+#Email Window Layout
+emailLayout = QVBoxLayout()
+emailLayout.addWidget(emailLabel)
+emailLayout.addWidget(emailTextBox)
+emailLayout.addWidget(emailButton)
+emailWindow.setLayout(emailLayout)
+
+#Email Logic
+toAddrInput = ""
 def buttonFunction():
-    global mytext
-    mytext = textBox.text()
+    global toAddrInput
+    toAddrInput = emailTextBox.text()
     sendEmail()
-    label.setText('Email sent to: ' + mytext)
-button.clicked.connect(lambda: buttonFunction())
+    emailLabel.setText('Email sent to: ' + toAddrInput)
+emailButton.clicked.connect(lambda: buttonFunction())
 
 app.exec_()
