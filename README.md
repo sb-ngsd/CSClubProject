@@ -1,4 +1,4 @@
 # CSClubProject
 Missing Features:
-    DSLR code
-    Photo filter code
+* DSLR code  
+* Photo filter code
