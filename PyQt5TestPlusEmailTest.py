@@ -79,7 +79,6 @@ app = QApplication([])
 startupWindow = QWidget()
 startupLabel = QLabel('CS Club Photobooth!\n Press the button to get started!')
 startupButton = QPushButton('Simulate Physical Button')
-
 #Startup Window Layout
 startupLayout = QVBoxLayout()
 startupLayout.addWidget(startupLabel)
@@ -113,6 +112,7 @@ def startupFunction():
     timer.start(1000)
 
 if isGpioAvailable == False:
+    startupButton.setDefault(True)
     startupButton.clicked.connect(lambda: startupFunction())
 
 #Email Vars
@@ -120,9 +120,12 @@ emailWindow = QWidget()
 emailTextBox = QLineEdit()
 emailButton = QPushButton('Send')
 emailLabel = QLabel('Email To Send Picture:')
+emailLabel.setAlignment(Qt.AlignBottom)
+emailLabel.setFont(QFont('Arial', 20))
 
 #Email Window Layout
 emailLayout = QVBoxLayout()
+emailLayout.setAlignment(Qt.AlignCenter)
 emailLayout.addWidget(emailLabel)
 emailLayout.addWidget(emailTextBox)
 emailLayout.addWidget(emailButton)
@@ -133,10 +136,11 @@ toAddrInput = ""
 def buttonFunction():
     global toAddrInput
     toAddrInput = emailTextBox.text()
-    #sendEmail()
+    sendEmail()
     emailLabel.setText('Email sent to: ' + toAddrInput)
     #if the program crashes here, trying changing python3 to python
     os.execv(sys.executable, ['python3'] + sys.argv)
 emailButton.clicked.connect(lambda: buttonFunction())
+emailTextBox.returnPressed.connect(lambda: buttonFunction())
 
 app.exec_()
