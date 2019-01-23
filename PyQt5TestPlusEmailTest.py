@@ -1,3 +1,28 @@
+#import and check if gpio pins are available
+isGpioAvailable = True
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    #global isGpioAvailable
+    isGpioAvailable = False
+    print("GPIO pins not available, falling back to software button!")
+#GPIO logic
+if isGpioAvailable == True:
+    import threading
+    from queue import Queue
+    import time
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    t = threading.Thread(target=gpioThread)
+    t.start()
+    def gpioThread():
+        while True:
+            input_state = GPIO.input(18)
+            if input_state == False:
+                startupFunction()
+                print('Button Pressed')
+                time.sleep(0.2)
+
 #Email imports
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -58,7 +83,8 @@ startupButton = QPushButton('Simulate Physical Button')
 #Startup Window Layout
 startupLayout = QVBoxLayout()
 startupLayout.addWidget(startupLabel)
-startupLayout.addWidget(startupButton)
+if isGpioAvailable == False:
+    startupLayout.addWidget(startupButton)
 startupWindow.setLayout(startupLayout)
 startupLabel.setAlignment(Qt.AlignCenter)
 startupLabel.setFont(QFont('Arial', 40))
@@ -82,11 +108,12 @@ def num():
         emailWindow.show()
 
 def startupFunction():
-    startupButton.setText('Clicked (Temp)')
+    #startupButton.setText('Clicked (Temp)')
     timer.timeout.connect(num)
     timer.start(1000)
 
-startupButton.clicked.connect(lambda: startupFunction())
+if isGpioAvailable == False:
+    startupButton.clicked.connect(lambda: startupFunction())
 
 #Email Vars
 emailWindow = QWidget()
