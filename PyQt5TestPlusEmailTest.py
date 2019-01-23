@@ -66,23 +66,16 @@ startupLabel.setFont(QFont('Arial', 40))
 #Show Startup Window
 startupWindow.show()
 
-#Startup Logic (somehow this works, I have no clue how but just go with it)
-def start_timer(slot, count=1, interval=1000):
-    counter = 11
-    def handler():
-        nonlocal counter
+#Startup Logic
+counter=10
+timer = QTimer()
+def num():
+    global counter, timer
+    if counter > 0:
+        startupLabel.setText(str(counter))
         counter -= 1
-        slot(counter)
-        if counter <= 0:
-            timer.stop()
-            timer.deleteLater()
-    timer = QTimer()
-    timer.timeout.connect(handler)
-    timer.start(interval)
-
-def timer_func(count):
-    startupLabel.setText(str(count))
-    if count <= 0:
+    else:
+        timer.stop()
         startupLabel.setText("Done!")
         #TAKE PICTURE CODE HERE
         startupWindow.close()
@@ -90,7 +83,8 @@ def timer_func(count):
 
 def startupFunction():
     startupButton.setText('Clicked (Temp)')
-    start_timer(timer_func, 11)
+    timer.timeout.connect(num)
+    timer.start(1000)
 
 startupButton.clicked.connect(lambda: startupFunction())
 
