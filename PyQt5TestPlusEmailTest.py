@@ -1,11 +1,3 @@
-#from PyQt5.QtWidgets import QApplication, QLabel, QLineEdit
-#app = QApplication([])
-#label = QLabel('Hello World!')
-#line = QLineEdit()
-#line.show()
-#label.show()
-#app.exec_()
-
 #Email imports
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -55,7 +47,7 @@ from PyQt5.QtGui import QFont
 #from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel
 #Countdown Stuff
-import time
+import os, sys
 #Init PyQt5
 app = QApplication([])
 #Startup Vars
@@ -120,8 +112,10 @@ toAddrInput = ""
 def buttonFunction():
     global toAddrInput
     toAddrInput = emailTextBox.text()
-    sendEmail()
+    #sendEmail()
     emailLabel.setText('Email sent to: ' + toAddrInput)
+    #if the program crashes here, trying changing python3 to python
+    os.execv(sys.executable, ['python3'] + sys.argv)
 emailButton.clicked.connect(lambda: buttonFunction())
 
 app.exec_()
