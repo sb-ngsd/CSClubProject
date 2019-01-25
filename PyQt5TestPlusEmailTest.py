@@ -22,6 +22,14 @@ if isGpioAvailable == True:
                 startupFunction()
                 print('Button Pressed')
                 time.sleep(0.2)
+#Pillow import
+from PIL import Image
+#Overlay logic
+def overlayFunction():
+    photo = Image.open('photo.png')
+    overlay = Image.open('overlay.png')
+    photo.paste(overlay, (0,0), overlay)
+    photo.save('output.png')
 
 #Email imports
 from email.mime.multipart import MIMEMultipart
@@ -45,8 +53,8 @@ def sendEmail():
     body = "Testing sending an email with an attachment with python"
     #attachment stuff
     msg.attach(MIMEText(body, 'plain'))
-    filename = "TestImg.png"
-    attachment = open("TestImg.png", "rb")
+    filename = "output.png"
+    attachment = open("output.png", "rb")
     #more attachment stuff
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((attachment).read())
@@ -102,12 +110,11 @@ def num():
     else:
         timer.stop()
         startupLabel.setText("Done!")
-        #TAKE PICTURE CODE HERE
+        overlayFunction()
         startupWindow.close()
         emailWindow.show()
 
 def startupFunction():
-    #startupButton.setText('Clicked (Temp)')
     timer.timeout.connect(num)
     timer.start(1000)
 
