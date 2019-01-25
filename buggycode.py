@@ -26,10 +26,11 @@ if isGpioAvailable == True:
 from PIL import Image
 #Overlay logic
 def overlayFunction():
-    photo = Image.open('photo.png')
-    overlay = Image.open('overlay.png')
-    photo.paste(overlay, (0,0), overlay)
-    photo.save('output.png')
+    for i in range(1,4):
+        photo = Image.open('photo.png')
+        overlay = Image.open('overlay{0}.png'.format(i))
+        photo.paste(overlay, (0,0), overlay)
+        photo.save('output{0}.png'.format(i))
 
 #Email imports
 from email.mime.multipart import MIMEMultipart
@@ -48,7 +49,7 @@ def sendEmail():
     msg['From'] = fromaddr
     msg['To'] = toaddr
     #subject
-    msg['Subject'] = "Python Email Test 3"
+    msg['Subject'] = "Python Email Test"
     #body
     body = "Testing sending an email with an attachment with python"
     #attachment stuff
@@ -76,9 +77,27 @@ def sendEmail():
 
 #GUI Stuff
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 #from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout
+#Keypress imports
+from pynput.keyboard import KeyCode, Key, Listener
+
+#Keypress logic
+pressedNum = 10
+def on_release(key):
+    for i in range(1,5):
+        if key == KeyCode(char=str(i)):
+            global pressedNum
+            pressedNum = i
+            overlayFunction()
+            previewWindow.close()
+            emailWindow.show()
+            return False
+#with Listener(
+#        on_release=on_release) as listener:
+#    listener.join()
+
 #Countdown Stuff
 import os, sys
 #Init PyQt5
@@ -110,9 +129,11 @@ def num():
     else:
         timer.stop()
         startupLabel.setText("Done!")
-        overlayFunction()
         startupWindow.close()
-        emailWindow.show()
+        previewWindow.show()
+        #with Listener(
+        #        on_release=on_release) as listener:
+        #    listener.join()
 
 def startupFunction():
     timer.timeout.connect(num)
@@ -121,6 +142,27 @@ def startupFunction():
 if isGpioAvailable == False:
     startupButton.setDefault(True)
     startupButton.clicked.connect(lambda: startupFunction())
+
+#Preview Vars
+previewWindow = QWidget()
+preview1 = QLabel()
+preview1.setPixmap(QPixmap('output1.png'))
+preview2 = QLabel()
+preview2.setPixmap(QPixmap('output2.png'))
+preview3 = QLabel()
+preview3.setPixmap(QPixmap('output3.png'))
+preview4 = QLabel()
+preview4.setPixmap(QPixmap('output4.png'))
+
+#Preview Window Layout
+previewLayout = QGridLayout()
+previewLayout.setColumnStretch(1, 4)
+previewLayout.setColumnStretch(2, 4)
+previewLayout.addWidget(preview1,0,0)
+previewLayout.addWidget(preview2,0,1)
+#previewLayout.addwidget(preview3,1,0)
+#previewLayout.addwidget(preview4,1,1)
+previewWindow.setLayout(previewLayout)
 
 #Email Vars
 emailWindow = QWidget()
