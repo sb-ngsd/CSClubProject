@@ -24,8 +24,30 @@ if isGpioAvailable == True:
                 time.sleep(0.2)
 #Pillow import
 from PIL import Image
+#cv2 support?
+cv2Installed = True
+try:
+    import cv2
+except ImportError:
+    print("cv2 not installed")
+    cv2Installed = False
+picamInstalled = True
+try:
+    from picam import Picamera
+except ImportError:
+    print("picam not installed")
+    picamInstalled = False
 #Overlay logic
 def overlayFunction():
+    global cv2Installed
+    global picamInstalled
+    if cv2Installed == True:
+        cam = cv2.VideoCapture(0)
+        retval, img = cam.read()
+        cv2.imwrite("photo.png", img)
+        cam.release()
+    if picamInstalled == True:
+        
     photo = Image.open('photo.png')
     overlay = Image.open('overlay.png')
     photo.paste(overlay, (0,0), overlay)
@@ -48,9 +70,9 @@ def sendEmail():
     msg['From'] = fromaddr
     msg['To'] = toaddr
     #subject
-    msg['Subject'] = "Python Email Test 3"
+    msg['Subject'] = "Placeholder Subject"
     #body
-    body = "Testing sending an email with an attachment with python"
+    body = "Placeholder Body"
     #attachment stuff
     msg.attach(MIMEText(body, 'plain'))
     filename = "output.png"
@@ -67,7 +89,7 @@ def sendEmail():
     #get password from environment variable
     #set it on linux with: export INPLAINSITE="passwd"
     #set it on windows with: SET INPLAINSITE=passwd
-    passwd = os.environ['INPLAINSITE']
+    passwd = os.environ.get('INPLAINSITE')
     server.login(fromaddr, passwd)
     text = msg.as_string()
     #send and quit

@@ -1,4 +1,2 @@
 # CSClubProject
-Missing Features:
-* DSLR code  
-* Photo filter code (broken implementation in buggycode.py)
+A basic pyqt5 photobooth with picam and webcam support!
