@@ -33,7 +33,7 @@ except ImportError:
     cv2Installed = False
 picamInstalled = True
 try:
-    from picam import Picamera
+    from picamera import PiCamera
 except ImportError:
     print("picam not installed")
     picamInstalled = False
@@ -47,7 +47,8 @@ def overlayFunction():
         cv2.imwrite("photo.png", img)
         cam.release()
     if picamInstalled == True:
-        
+        cam = PiCamera()
+        cam.capture('photo.png')
     photo = Image.open('photo.png')
     overlay = Image.open('overlay.png')
     photo.paste(overlay, (0,0), overlay)
@@ -61,13 +62,12 @@ from email import encoders
 import smtplib
 #Email function
 def sendEmail():
-    #to/from vars
-    fromaddr = "samuel.brand@ngsd.k12.wi.us"
+    #to vars
     toaddr = toAddrInput
 
     msg = MIMEMultipart()
 
-    msg['From'] = fromaddr
+    msg['From'] = "cs.newglarus@gmail.com"
     msg['To'] = toaddr
     #subject
     msg['Subject'] = "Placeholder Subject"
