@@ -1,5 +1,5 @@
 #import and check if gpio pins are available
-isGpioAvailable = True
+isGpioAvailable = False
 try:
     import RPi.GPIO as GPIO
 except ImportError:
