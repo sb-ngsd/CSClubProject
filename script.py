@@ -37,8 +37,8 @@ try:
 except ImportError:
     print("picam not installed")
     picamInstalled = False
-#Overlay logic
-def overlayFunction():
+#Take Photo
+def cameraFunction():
     global cv2Installed
     global picamInstalled
     if cv2Installed == True:
@@ -49,6 +49,16 @@ def overlayFunction():
     if picamInstalled == True:
         cam = PiCamera()
         cam.capture('photo.png')
+
+
+#Overlay logic
+pictureTaken = False
+def overlayFunction():
+    #only take picture once
+    global pictureTaken
+    if pictureTaken == False
+        cameraFunction()
+        pictureTaken = True
     photo = Image.open('photo.png')
     overlay = Image.open('overlay.png')
     photo.paste(overlay, (0,0), overlay)
