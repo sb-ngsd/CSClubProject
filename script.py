@@ -53,16 +53,18 @@ def cameraFunction():
 
 #Overlay logic
 pictureTaken = False
-def overlayFunction():
+def overlayFunction(count):
     #only take picture once
     global pictureTaken
-    if pictureTaken == False
+    if pictureTaken == False:
         cameraFunction()
         pictureTaken = True
     photo = Image.open('photo.png')
-    overlay = Image.open('overlay.png')
-    photo.paste(overlay, (0,0), overlay)
-    photo.save('output.png')
+    psize = pwidth, pheight = photo.size
+    overlay = Image.open('overlay{}.png'.format(count))
+    overlayS = overlay.resize((pwidth, pheight), Image.ANTIALIAS)
+    photo.paste(overlayS, (0,0), overlayS)
+    photo.save('output{}.png'.format(count))
 
 #Email imports
 from email.mime.multipart import MIMEMultipart
@@ -71,7 +73,9 @@ from email.mime.base import MIMEBase
 from email import encoders
 import smtplib
 #Email function
+selectedP = 0
 def sendEmail():
+    global selectedP
     #to vars
     toaddr = toAddrInput
 
@@ -86,7 +90,7 @@ def sendEmail():
     #attachment stuff
     msg.attach(MIMEText(body, 'plain'))
     filename = "output.png"
-    attachment = open("output.png", "rb")
+    attachment = open("output{}.png".format(selectedP), "rb")
     #more attachment stuff
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((attachment).read())
@@ -108,9 +112,9 @@ def sendEmail():
 
 #GUI Stuff
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 #from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout
 #Countdown Stuff
 import os, sys
 #Init PyQt5
@@ -142,9 +146,11 @@ def num():
     else:
         timer.stop()
         startupLabel.setText("Done!")
-        overlayFunction()
+        #overlayFunction()
+        selectFunction()
         startupWindow.close()
-        emailWindow.show()
+        selectWindow.show()
+        #emailWindow.show()
 
 def startupFunction():
     timer.timeout.connect(num)
@@ -154,11 +160,36 @@ if isGpioAvailable == False:
     startupButton.setDefault(True)
     startupButton.clicked.connect(lambda: startupFunction())
 
+#Filter Selection Window
+selectWindow = QWidget()
+selectLayout = QGridLayout()
+labelList = dict()
+#range = number of filters, example: 3 = 0,1,2
+def selectFunction():
+    for i in range(3):
+        overlayFunction(i)
+        name = 'label{}'.format(i)
+        label = QLabel()
+        pixmap = QPixmap('output{}.png'.format(i))
+        pixmapS = pixmap.scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
+        label.setPixmap(pixmapS)
+        label.mousePressEvent = chooseFunction
+        label.setObjectName(name)
+        selectLayout.addWidget(label, 0, i)
+        labelList[name] = label
+    selectWindow.setLayout(selectLayout)
+
+def chooseFunction(event, num):
+    global selectedP
+    selectedP = num
+    selectWindow.close()
+    emailWindow.show()
+
 #Email Vars
 emailWindow = QWidget()
 emailTextBox = QLineEdit()
 emailButton = QPushButton('Send')
-emailLabel = QLabel('Email To Send Picture:')
+emailLabel = QLabel('Email To Send Picture To:')
 emailLabel.setAlignment(Qt.AlignBottom)
 emailLabel.setFont(QFont('Arial', 20))
 
