@@ -61,42 +61,51 @@ def overlayFunction(count):
         pictureTaken = True
     photo = Image.open('photo.png')
     psize = pwidth, pheight = photo.size
-    overlay = Image.open('overlay{}.png'.format(count))
+    overlay = Image.open('overlays/overlay{}.png'.format(count))
     overlayS = overlay.resize((pwidth, pheight), Image.ANTIALIAS)
     photo.paste(overlayS, (0,0), overlayS)
-    photo.save('output{}.png'.format(count))
+    photo.save('output/output{}.png'.format(count))
 
 #Email imports
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 from email import encoders
 import smtplib
 #Email function
-selectedP = 0
+#set number of filters here, example: 4 = 0,1,2,3
+selectedRange = 4
 def sendEmail():
     global selectedP
     #to vars
+    fromaddr = "cs.newglarus@gmail.com"
     toaddr = toAddrInput
 
     msg = MIMEMultipart()
 
-    msg['From'] = "cs.newglarus@gmail.com"
+    msg['From'] = fromaddr
     msg['To'] = toaddr
     #subject
-    msg['Subject'] = "Placeholder Subject"
+    msg['Subject'] = "Photobooth Photos"
     #body
-    body = "Placeholder Body"
+    body = "Your photos are attached to this email."
     #attachment stuff
     msg.attach(MIMEText(body, 'plain'))
-    filename = "output.png"
-    attachment = open("output{}.png".format(selectedP), "rb")
-    #more attachment stuff
-    part = MIMEBase('application', 'octet-stream')
-    part.set_payload((attachment).read())
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-    msg.attach(part)
+    for i in range(selectedRange):
+        #filename = "output{}.png".format(i)
+        #attachment = open("output/output{}.png".format(i), "rb")
+        #more attachment stuff
+        #part = MIMEBase('application', 'octet-stream')
+        #part.set_payload((attachment).read())
+        #encoders.encode_base64(part)
+        #part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+        #msg.attach(part)
+        msgPicture = open("output/output{}.png".format(i), 'rb')
+        msgImage = MIMEImage(msgPicture.read())
+        msgPicture.close()
+        msgImage.add_header('Content-Disposition', 'attachment', filename="output{}.png".format(i))
+        msg.attach(msgImage)
     #start smtp
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -104,6 +113,8 @@ def sendEmail():
     #set it on linux with: export INPLAINSITE="passwd"
     #set it on windows with: SET INPLAINSITE=passwd
     passwd = os.environ.get('INPLAINSITE')
+    if passwd == "None":
+        print('DEBUGGING NOTE: cs.newglarus password must be input, instructions are in README.md')
     server.login(fromaddr, passwd)
     text = msg.as_string()
     #send and quit
@@ -136,7 +147,7 @@ startupLabel.setFont(QFont('Arial', 40))
 startupWindow.show()
 
 #Startup Logic
-counter=10
+counter=5
 timer = QTimer()
 def num():
     global counter, timer
@@ -163,22 +174,33 @@ if isGpioAvailable == False:
 #Filter Selection Window
 selectWindow = QWidget()
 selectLayout = QGridLayout()
+selectLayoutB = QVBoxLayout()
+selectButton = QPushButton('Continue')
+selectButton.setDefault(True)
+selectButton.clicked.connect(lambda: selectContinueFunction())
 labelList = dict()
 #range = number of filters, example: 3 = 0,1,2
 def selectFunction():
-    for i in range(3):
+    for i in range(selectedRange):
         overlayFunction(i)
         name = 'label{}'.format(i)
         label = QLabel()
-        pixmap = QPixmap('output{}.png'.format(i))
+        pixmap = QPixmap('output/output{}.png'.format(i))
         pixmapS = pixmap.scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
         label.setPixmap(pixmapS)
         label.mousePressEvent = chooseFunction
         label.setObjectName(name)
         selectLayout.addWidget(label, 0, i)
         labelList[name] = label
-    selectWindow.setLayout(selectLayout)
+    selectLayoutB.addLayout(selectLayout)
+    selectLayoutB.addWidget(selectButton)
+    selectWindow.setLayout(selectLayoutB)
 
+def selectContinueFunction():
+    selectWindow.close()
+    emailWindow.show()
+
+#No longer used (for now)
 def chooseFunction(event, num):
     global selectedP
     selectedP = num
@@ -189,7 +211,7 @@ def chooseFunction(event, num):
 emailWindow = QWidget()
 emailTextBox = QLineEdit()
 emailButton = QPushButton('Send')
-emailLabel = QLabel('Email To Send Picture To:')
+emailLabel = QLabel('Email To Send Pictures To:')
 emailLabel.setAlignment(Qt.AlignBottom)
 emailLabel.setFont(QFont('Arial', 20))
 
