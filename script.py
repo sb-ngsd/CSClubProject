@@ -74,8 +74,6 @@ from email.mime.image import MIMEImage
 from email import encoders
 import smtplib
 #Email function
-#set number of filters here, example: 4 = 0,1,2,3
-selectedRange = 4
 def sendEmail():
     global selectedP
     #to vars
@@ -128,6 +126,8 @@ from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout
 #Countdown Stuff
 import os, sys
+#get amount of filters in overlays folder
+selectedRange = len([name for name in os.listdir('overlays') if os.path.isfile(os.path.join('overlays', name))])
 #Init PyQt5
 app = QApplication([])
 #Startup Vars
