@@ -53,6 +53,8 @@ def cameraFunction():
 
 #Overlay logic
 pictureTaken = False
+import os
+os.makedirs("output", exist_ok=True)
 def overlayFunction(count):
     #only take picture once
     global pictureTaken
@@ -125,7 +127,7 @@ from PyQt5.QtGui import QFont, QPixmap
 #from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout
 #Countdown Stuff
-import os, sys
+import sys
 #get amount of filters in overlays folder
 selectedRange = len([name for name in os.listdir('overlays') if os.path.isfile(os.path.join('overlays', name))])
 #Init PyQt5
@@ -144,7 +146,7 @@ startupLabel.setAlignment(Qt.AlignCenter)
 startupLabel.setFont(QFont('Arial', 40))
 
 #Show Startup Window
-startupWindow.show()
+startupWindow.showFullScreen()
 
 #Startup Logic
 counter=5
@@ -160,8 +162,8 @@ def num():
         #overlayFunction()
         selectFunction()
         startupWindow.close()
-        selectWindow.show()
-        #emailWindow.show()
+        selectWindow.showFullScreen()
+        #emailWindow.showFullScreen()
 
 def startupFunction():
     timer.timeout.connect(num)
@@ -188,7 +190,7 @@ def selectFunction():
         pixmap = QPixmap('output/output{}.png'.format(i))
         pixmapS = pixmap.scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
         label.setPixmap(pixmapS)
-        label.mousePressEvent = chooseFunction
+        #label.mousePressEvent = chooseFunction
         label.setObjectName(name)
         selectLayout.addWidget(label, 0, i)
         labelList[name] = label
@@ -198,19 +200,20 @@ def selectFunction():
 
 def selectContinueFunction():
     selectWindow.close()
-    emailWindow.show()
+    emailWindow.showFullScreen()
 
 #No longer used (for now)
 def chooseFunction(event, num):
     global selectedP
     selectedP = num
     selectWindow.close()
-    emailWindow.show()
+    emailWindow.showFullScreen()
 
 #Email Vars
 emailWindow = QWidget()
 emailTextBox = QLineEdit()
 emailButton = QPushButton('Send')
+emailCancelButton = QPushButton("Don't Send (Cancel)")
 emailLabel = QLabel('Email To Send Pictures To:')
 emailLabel.setAlignment(Qt.AlignBottom)
 emailLabel.setFont(QFont('Arial', 20))
@@ -221,6 +224,7 @@ emailLayout.setAlignment(Qt.AlignCenter)
 emailLayout.addWidget(emailLabel)
 emailLayout.addWidget(emailTextBox)
 emailLayout.addWidget(emailButton)
+emailLayout.addWidget(emailCancelButton)
 emailWindow.setLayout(emailLayout)
 
 #Email Logic
@@ -233,6 +237,7 @@ def buttonFunction():
     #if the program crashes here, trying changing python3 to python
     os.execv(sys.executable, ['python3'] + sys.argv)
 emailButton.clicked.connect(lambda: buttonFunction())
+emailCancelButton.clicked.connect(lambda: os.execv(sys.executable, ['python3'] + sys.argv))
 emailTextBox.returnPressed.connect(lambda: buttonFunction())
 
 app.exec_()
