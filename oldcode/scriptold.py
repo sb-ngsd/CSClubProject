@@ -125,7 +125,7 @@ def sendEmail():
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QFont, QPixmap
 #from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout, QListWidgetItem, QListWidget, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QGridLayout
 #Countdown Stuff
 import sys
 #get amount of filters in overlays folder
@@ -177,10 +177,6 @@ if isGpioAvailable == False:
 selectWindow = QWidget()
 selectLayout = QGridLayout()
 selectLayoutB = QVBoxLayout()
-selectList = QListWidget()
-#selectList.itemClicked.connect(lambda: getClickedItem())
-selectList.itemSelectionChanged.connect(lambda: getChanged())
-selectList.setSelectionMode(QAbstractItemView.ExtendedSelection)
 selectButton = QPushButton('Continue')
 selectButton.setDefault(True)
 selectButton.clicked.connect(lambda: selectContinueFunction())
@@ -196,28 +192,12 @@ def selectFunction():
         label.setPixmap(pixmapS)
         #label.mousePressEvent = chooseFunction
         label.setObjectName(name)
-        item = QListWidgetItem()
-        item.setSizeHint(label.sizeHint())
-        selectList.addItem(item)
-        selectList.setItemWidget(item, label)
-        #selectLayout.addWidget(label, 0, i)
+        selectLayout.addWidget(label, 0, i)
         labelList[name] = label
-    selectLayout.addWidget(selectList)
     selectLayoutB.addLayout(selectLayout)
     selectLayoutB.addWidget(selectButton)
     selectWindow.setLayout(selectLayoutB)
 
-def getClickedItem():
-    selectButton.setText(str(selectList.currentRow()))
-
-itmarrcurrent = []
-def getChanged():
-    global itmarrcurrent
-    itmarr = []
-    for item in selectList.selectedItems():
-        itmarr.append(selectList.row(item))
-    #selectButton.setText(str(itmarr))
-    itmarrcurrent = itmarr
 def selectContinueFunction():
     selectWindow.close()
     emailWindow.showFullScreen()
