@@ -172,12 +172,13 @@ if isGpioAvailable == False:
 
 #Filter Selection Window
 selectWindow = QWidget()
-selectLayout = QGridLayout()
+selectLayout = QVBoxLayout()
 selectLayoutB = QVBoxLayout()
 selectList = QListWidget()
 #selectList.itemClicked.connect(lambda: getClickedItem())
 selectList.itemSelectionChanged.connect(lambda: getChanged())
 selectList.setSelectionMode(QAbstractItemView.ExtendedSelection)
+selectList.setFlow(QListWidget.LeftToRight)
 selectButton = QPushButton('Continue')
 selectButton.setDefault(True)
 selectButton.clicked.connect(lambda: selectContinueFunction())
@@ -216,13 +217,6 @@ def getChanged():
     #selectButton.setText(str(itmarr))
     itmarrcurrent = itmarr
 def selectContinueFunction():
-    selectWindow.close()
-    emailWindow.showFullScreen()
-
-#No longer used (for now)
-def chooseFunction(event, num):
-    global selectedP
-    selectedP = num
     selectWindow.close()
     emailWindow.showFullScreen()
 
