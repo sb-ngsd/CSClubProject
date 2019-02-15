@@ -77,7 +77,6 @@ from email import encoders
 import smtplib
 #Email function
 def sendEmail():
-    global selectedP
     #to vars
     fromaddr = "cs.newglarus@gmail.com"
     toaddr = toAddrInput
@@ -92,20 +91,18 @@ def sendEmail():
     body = "Your photos are attached to this email."
     #attachment stuff
     msg.attach(MIMEText(body, 'plain'))
-    for i in range(selectedRange):
-        #filename = "output{}.png".format(i)
-        #attachment = open("output/output{}.png".format(i), "rb")
-        #more attachment stuff
-        #part = MIMEBase('application', 'octet-stream')
-        #part.set_payload((attachment).read())
-        #encoders.encode_base64(part)
-        #part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-        #msg.attach(part)
+    def attachPicture(i):
         msgPicture = open("output/output{}.png".format(i), 'rb')
         msgImage = MIMEImage(msgPicture.read())
         msgPicture.close()
         msgImage.add_header('Content-Disposition', 'attachment', filename="output{}.png".format(i))
         msg.attach(msgImage)
+    if not itmarrcurrent:
+        for i in range(selectedRange):
+            attachPicture(i)
+    else:
+        for i in itmarrcurrent:
+            attachPicture(i)
     #start smtp
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
