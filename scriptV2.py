@@ -24,13 +24,14 @@ import smtplib
 # PyQt Imports
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QFont, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QFrame
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QGridLayout, QLineEdit, QLabel, QFrame
 # Misc Stuff
 SelectRange = len([name for name in os.listdir('overlays') if os.path.isfile(os.path.join('overlays', name))])
 os.makedirs("output", exist_ok=True)
 # Picture Function
-def TakePicture(cv2installed, PicamInstalled):
-    if cv2installed == True:
+def TakePicture():
+    global cv2Installed, PicamInstalled
+    if cv2Installed == True:
         cam = cv2.VideoCapture(0)
         retval, img = cam.read()
         cv2.imwrite("photo.png", img)
@@ -41,12 +42,12 @@ def TakePicture(cv2installed, PicamInstalled):
 
 # Overlay Function
 def ApplyOverlays(SelectRange):
-    TakePicture(cv2installed, PicamInstalled)
-    for _ in range(SelectRange):
+    TakePicture()
+    for i in range(SelectRange):
         photo = Image.open('photo.png')
-        overlay = Image.open('overlays/overlay{}.png'.format(SelectRange)).resize(photo.size, Image.ANTIALIAS)
+        overlay = Image.open('overlays/overlay{}.png'.format(i)).resize(photo.size, Image.ANTIALIAS)
         photo.paste(overlay, (0,0), overlay)
-        photo.save('output/output{}.png'.format(SelectRange))
+        photo.save('output/output{}.png'.format(i))
 
 # Email Function
 def SendEmail(ToAddr):
@@ -78,35 +79,41 @@ app = QApplication([])
 # Start Window
 StartWindow = QWidget()
 StartLabel = QLabel('CS Club Photobooth!\n Press the enter key or the button to get started!')
-StartLabel.setAlignment(Qt.AlignCenter).setFont(QFont('Arial', 40))
+StartLabel.setAlignment(Qt.AlignCenter)
+StartLabel.setFont(QFont('Arial', 40))
 StartButton = QPushButton('Start!')
-StartButton.setDefault(True).clicked.connect(StartFunction)
+StartButton.setDefault(True)
+#StartButton.clicked.connect(StartFunction)
 # Start Layout
-StartLayout = QVBoxLayout().addWidget(StartLabel).addWidget(StartButton)
+StartLayout = QVBoxLayout()
+StartLayout.addWidget(StartLabel)
+StartLayout.addWidget(StartButton)
 StartWindow.setLayout(StartLayout)
 StartWindow.showFullScreen()
 
 # Start Logic
-StartCounter = 5
-StartTimer = QTimer()
-def StartTimer():
-    global StartCounter, StartTimer
-    if StartCounter > 0:
-        StartLabel.setText(str(StartCounter))
-        StartCounter -= 1
+counter = 5
+timer = QTimer()
+def num():
+    global counter, timer
+    if counter > 0:
+        StartLabel.setText(str(counter))
+        counter -= 1
     else:
-        StartTimer.stop()
+        timer.stop()
         StartLabel.setText("Done! Please wait while we process your photo.")
         ApplyOverlays(SelectRange)
         
 def StartFunction():
-    StartTimer.timeout.connect(StartTimer)
-    StartTimer.start(1000)
+    timer.timeout.connect(num)
+    timer.start(1000)
+StartButton.clicked.connect(StartFunction)
 
 # Select Class
 class SelectWindow(QWidget):
     def __init__(self):
         super(SelectWindow, self).__init__()
+        self.setFocusPolicy(Qt.StrongFocus)
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Left:
             print ("Left Arrow Pressed")
@@ -122,18 +129,21 @@ SelectWindow = SelectWindow()
 SelectLayout = QGridLayout()
 SelectLayoutB = QVBoxLayout()
 SelectButton = QPushButton('Continue')
-SelectButton.setDefault(True)
-SelectButton.clicked.connect(SelectContinueFunction)
+SelectButton.setDefault(False)
+#SelectButton.clicked.connect(SelectContinueFunction)
 SelectList = dict()
-SelectCurrent = ""
+SelectCurrentX = 0
+SelectCurrentY = 0
 
 # Select Function
 def SelectFunction():
     for i in range(SelectRange):
-        label = QLabel().setFrameShadow(QFrame.Sunken)
-        pixmap = QPixmap('output/output{}.png'.format(i)).scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
+        label = QLabel()
+        label.setFrameShadow(QFrame.Sunken)
+        pixmap = QPixmap('output/output{}.png'.format(i))
+        pixmap = pixmap.scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
         label.setPixmap(pixmap)
         label.setObjectName('label{}'.format(i))
         SelectList[i] = label
-
-# 
+        
+app.exec_()
