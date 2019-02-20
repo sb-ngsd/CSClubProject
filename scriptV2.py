@@ -51,6 +51,7 @@ def ApplyOverlays(SelectRange):
 
 # Email Function
 def SendEmail(ToAddr):
+    global SelectList
     FromAddr = "cs.newglarus@gmail.com"
     msg = MIMEMultipart()
     msg['From'] = FromAddr
@@ -58,14 +59,13 @@ def SendEmail(ToAddr):
     msg['Subject'] = "Your Photobooth Photos"
     msg.attach(MIMEText("Your photos are attached to this email.", 'plain'))
     def AttachPicture(i):
-        MsgImage = MIMEImage(open("output/output{}.png".format(i), 'rb').read().close())
+        MsgPicture = open("output/output{}.png".format(i), 'rb')
+        MsgImage = MIMEImage(MsgPicture.read())
+        MsgPicture.close()
         MsgImage.add_header('Content-Disposition', 'attachment', filename="output{}.png".format(i))
         msg.attach(MsgImage)
-    if not ItmArrCurrent:
-        for i in range(SelectRange):
-            AttachPicture(i)
-    else:
-        for i in ItmArrCurrent:
+    for i in SelectList:
+        if SelectList[i].Fstate == True:
             AttachPicture(i)
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -103,7 +103,7 @@ def num():
         timer.stop()
         StartLabel.setText("Done! Please wait while we process your photo.")
         ApplyOverlays(SelectRange)
-        
+        SelectFunction()
 def StartFunction():
     timer.timeout.connect(num)
     timer.start(1000)
@@ -115,14 +115,25 @@ class SelectWindow(QWidget):
         super(SelectWindow, self).__init__()
         self.setFocusPolicy(Qt.StrongFocus)
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Left:
-            print ("Left Arrow Pressed")
+        global SelectCurrentX, SelectCurrentY, SelectList
+        print (event.key())
+        if event.key() == Qt.Key_Left and SelectCurrentX > 0:
+            SelectButton.setText("Left")
+            SelectCurrentX -= 1
         elif event.key() == Qt.Key_Right:
-            print ("Right Arrow Pressed")
+            SelectButton.setText("Right")
+            SelectCurrentX += 1
         elif event.key() == Qt.Key_Up:
             print ("Up Arrow Pressed")
         elif event.key() == Qt.Key_Down:
             print ("Down Arrow Pressed")
+        elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+            SelectButton.setText("Enter" + str(SelectCurrentX))
+            SelectList[SelectCurrentX].Fstate = not SelectList[SelectCurrentX].Fstate
+            if SelectList[SelectCurrentX].Fstate == True:
+                SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
+            else:
+                SelectList[SelectCurrentX].setFrameShape(QFrame.NoFrame)
 
 # Select Window
 SelectWindow = SelectWindow()
@@ -130,7 +141,6 @@ SelectLayout = QGridLayout()
 SelectLayoutB = QVBoxLayout()
 SelectButton = QPushButton('Continue')
 SelectButton.setDefault(False)
-#SelectButton.clicked.connect(SelectContinueFunction)
 SelectList = dict()
 SelectCurrentX = 0
 SelectCurrentY = 0
@@ -145,5 +155,47 @@ def SelectFunction():
         label.setPixmap(pixmap)
         label.setObjectName('label{}'.format(i))
         SelectList[i] = label
-        
+        SelectList[i].Fstate = False
+        SelectLayout.addWidget(SelectList[i], 0, i)
+    SelectLayoutB.addLayout(SelectLayout)
+    SelectLayoutB.addWidget(SelectButton)
+    SelectWindow.setLayout(SelectLayoutB)
+    StartWindow.close()
+    SelectWindow.showFullScreen()
+
+def SelectContinueFunction():
+    SelectWindow.close()
+    EmailWindow.showFullScreen()
+SelectButton.clicked.connect(SelectContinueFunction)
+
+# Email Window
+EmailWindow = QWidget()
+EmailTextBox = QLineEdit()
+EmailButton = QPushButton('Send')
+EmailCancelButton = QPushButton("Don't Send (Cancel)")
+EmailLabel = QLabel('Email To Send Pictures To:')
+EmailLabel.setAlignment(Qt.AlignBottom)
+EmailLabel.setFont(QFont('Arial', 20))
+
+EmailLayout = QVBoxLayout()
+EmailLayout.setAlignment(Qt.AlignCenter)
+EmailLayout.addWidget(EmailLabel)
+EmailLayout.addWidget(EmailTextBox)
+EmailLayout.addWidget(EmailButton)
+EmailLayout.addWidget(EmailCancelButton)
+EmailWindow.setLayout(EmailLayout)
+
+# Email Function
+def EmailFunction():
+    ToAddr = EmailTextBox.text()
+    EmailLabel.setText('Email sent to: ' + ToAddr)
+    SendEmail(ToAddr)
+    #This most likely is going to cause a memory leak over time
+    os.execv(sys.executable, ['python3'] + sys.argv)
+
+EmailButton.clicked.connect(EmailFunction)
+EmailCancelButton.clicked.connect(lambda: os.execv(sys.executable, ['python3'] + sys.argv))
+EmailTextBox.returnPressed.connect(EmailFunction)
+
+
 app.exec_()
