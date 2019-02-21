@@ -120,9 +120,14 @@ class SelectWindow(QWidget):
         if event.key() == Qt.Key_Left and SelectCurrentX > 0:
             SelectButton.setText("Left")
             SelectCurrentX -= 1
+            SelectList[SelectCurrentX + 1].setFrameShape(QFrame.NoFrame)
+            SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
         elif event.key() == Qt.Key_Right:
             SelectButton.setText("Right")
             SelectCurrentX += 1
+            if SelectCurrentX != 0:
+                SelectList[SelectCurrentX + 1].setFrameShape(QFrame.NoFrame)
+            SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
         elif event.key() == Qt.Key_Up:
             print ("Up Arrow Pressed")
         elif event.key() == Qt.Key_Down:
@@ -131,9 +136,11 @@ class SelectWindow(QWidget):
             SelectButton.setText("Enter" + str(SelectCurrentX))
             SelectList[SelectCurrentX].Fstate = not SelectList[SelectCurrentX].Fstate
             if SelectList[SelectCurrentX].Fstate == True:
-                SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
+                SelectList[SelectCurrentX].setStyleSheet("background-color: black;")
+                #SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
             else:
-                SelectList[SelectCurrentX].setFrameShape(QFrame.NoFrame)
+                #SelectList[SelectCurrentX].setFrameShape(QFrame.NoFrame)
+                SelectList[SelectCurrentX].setStyleSheet("")
 
 # Select Window
 SelectWindow = SelectWindow()
