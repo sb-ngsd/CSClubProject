@@ -53,31 +53,6 @@ def ApplyOverlays(SelectRange):
         photo.paste(overlay, (0,0), overlay)
         photo.save(timedir + '/output{}.png'.format(i))
 
-
-# Email Function
-def SendEmail(ToAddr):
-    global SelectList
-    FromAddr = "cs.newglarus@gmail.com"
-    msg = MIMEMultipart()
-    msg['From'] = FromAddr
-    msg['To'] = ToAddr
-    msg['Subject'] = "Your Photobooth Photos"
-    msg.attach(MIMEText("Your photos are attached to this email.", 'plain'))
-    def AttachPicture(i):
-        MsgPicture = open(timedir + "/output{}.png".format(i), 'rb')
-        MsgImage = MIMEImage(MsgPicture.read())
-        MsgPicture.close()
-        MsgImage.add_header('Content-Disposition', 'attachment', filename="output{}.png".format(i))
-        msg.attach(MsgImage)
-    for i in range(SelectRange):
-        AttachPicture(i)
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    passwd = os.environ.get('INPLAINSITE')
-    server.login(FromAddr, passwd)
-    server.sendmail(FromAddr, ToAddr, msg.as_string())
-    server.quit()
-
 # PyQt Gui
 app = QApplication([])
 # Start Window
@@ -96,16 +71,18 @@ StartWindow.setLayout(StartLayout)
 StartWindow.showFullScreen()
 
 # Start Logic
-counter = 5
+counter = 7
 timer = QTimer()
 def num():
     global counter, timer
     if counter > 0:
         StartLabel.setText(str(counter))
         counter -= 1
+    elif counter = 0:
+        StartLabel.setText("Done! Please wait while we process your photo.")
+        counter -= 1
     else:
         timer.stop()
-        StartLabel.setText("Done! Please wait while we process your photo.")
         ApplyOverlays(SelectRange)
         SelectFunction()
 def StartFunction():
@@ -137,16 +114,7 @@ def SelectFunction():
 
 def SelectContinueFunction():
     SelectWindow.close()
-    FinalWindow.showFullScreen()
-    QTimer.singleShot(5000, lambda: os.execv(sys.executable, ['python3'] + sys.argv))
+    sys.exit()
 SelectButton.clicked.connect(SelectContinueFunction)
-
-FinalWindow = QWidget()
-FinalLabel = QLabel("Thanks for trying the photobooth!")
-FinalLabel.setAlignment(Qt.AlignCenter)
-FinalLabel.setFont(QFont('Arial', 60))
-FinalLayout = QVBoxLayout()
-FinalLayout.addWidget(FinalLabel)
-FinalWindow.setLayout(FinalLayout)
 
 app.exec_()
