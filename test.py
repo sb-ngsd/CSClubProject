@@ -1,6 +1,10 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLineEdit, QLabel, QFrame
+import os
+import sys
+SelectRange = len([name for name in os.listdir('overlays') if os.path.isfile(os.path.join('overlays', name))])
+print (SelectRange)
 
 app = QApplication([])
 

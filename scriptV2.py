@@ -118,15 +118,15 @@ class SelectWindow(QWidget):
         global SelectCurrentX, SelectCurrentY, SelectList
         print (event.key())
         if event.key() == Qt.Key_Left and SelectCurrentX > 0:
-            SelectButton.setText("Left")
+            SelectButton.setText(str(SelectCurrentX))
             SelectCurrentX -= 1
             SelectList[SelectCurrentX + 1].setFrameShape(QFrame.NoFrame)
             SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
-        elif event.key() == Qt.Key_Right:
-            SelectButton.setText("Right")
+        elif event.key() == Qt.Key_Right and SelectCurrentX < SelectRange - 1:
+            SelectButton.setText(str(SelectCurrentX))
             SelectCurrentX += 1
             if SelectCurrentX != 0:
-                SelectList[SelectCurrentX + 1].setFrameShape(QFrame.NoFrame)
+                SelectList[SelectCurrentX - 1].setFrameShape(QFrame.NoFrame)
             SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
         elif event.key() == Qt.Key_Up:
             print ("Up Arrow Pressed")
@@ -157,6 +157,7 @@ def SelectFunction():
     for i in range(SelectRange):
         label = QLabel()
         label.setFrameShadow(QFrame.Sunken)
+        label.setLineWidth(3)
         pixmap = QPixmap('output/output{}.png'.format(i))
         pixmap = pixmap.scaled(480, 360, Qt.KeepAspectRatio, Qt.FastTransformation)
         label.setPixmap(pixmap)
@@ -164,11 +165,13 @@ def SelectFunction():
         SelectList[i] = label
         SelectList[i].Fstate = False
         SelectLayout.addWidget(SelectList[i], 0, i)
+    SelectList[0].setFrameShape(QFrame.Panel) 
     SelectLayoutB.addLayout(SelectLayout)
     SelectLayoutB.addWidget(SelectButton)
     SelectWindow.setLayout(SelectLayoutB)
     StartWindow.close()
     SelectWindow.showFullScreen()
+    SelectButton.setText(str(SelectCurrentX))
 
 def SelectContinueFunction():
     SelectWindow.close()
