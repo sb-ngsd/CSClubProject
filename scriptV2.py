@@ -2,6 +2,8 @@
 from PIL import Image
 import os
 import sys # not sure if necessary anymore
+# Multiprocessing Imports
+import multiprocessing
 # Picture Imports
 cv2Installed = True
 try:
@@ -43,11 +45,18 @@ def TakePicture():
 # Overlay Function
 def ApplyOverlays(SelectRange):
     TakePicture()
-    for i in range(SelectRange):
+    processes = []
+    def ProcessFunction(i):
         photo = Image.open('photo.png')
         overlay = Image.open('overlays/overlay{}.png'.format(i)).resize(photo.size, Image.ANTIALIAS)
         photo.paste(overlay, (0,0), overlay)
         photo.save('output/output{}.png'.format(i))
+    for i in range(SelectRange): 
+        t = multiprocessing.Process(target=ProcessFunction, args=(i,))
+        processes.append(t)
+        t.start()
+    for i in processes:
+        i.join()
 
 # Email Function
 def SendEmail(ToAddr):
