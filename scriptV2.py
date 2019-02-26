@@ -118,13 +118,13 @@ class SelectWindow(QWidget):
         global SelectCurrentX, SelectCurrentY, SelectList
         print (event.key())
         if event.key() == Qt.Key_Left and SelectCurrentX > 0:
-            SelectButton.setText(str(SelectCurrentX))
             SelectCurrentX -= 1
+            SelectButton.setText(str(SelectCurrentX))
             SelectList[SelectCurrentX + 1].setFrameShape(QFrame.NoFrame)
             SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
         elif event.key() == Qt.Key_Right and SelectCurrentX < SelectRange - 1:
-            SelectButton.setText(str(SelectCurrentX))
             SelectCurrentX += 1
+            SelectButton.setText(str(SelectCurrentX))
             if SelectCurrentX != 0:
                 SelectList[SelectCurrentX - 1].setFrameShape(QFrame.NoFrame)
             SelectList[SelectCurrentX].setFrameShape(QFrame.Panel)
